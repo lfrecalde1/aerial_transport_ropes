@@ -158,11 +158,8 @@ classdef Rope < matlab.mixin.SetGet
             end
             
         end
-        
-        function apply_Velocity(obj,Velocity_systems)
-            for i = 1:obj.number_rope
-                obj.n_masses(i, 1).set_vel(Velocity_systems(:,i))
-            end
+        function aply_Velocity(obj)
+            
         end
     end
 end

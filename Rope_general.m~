@@ -1,0 +1,79 @@
+%% Code to simulate a rope
+clc, clear all, close all;
+%% Set time parameters
+ts = 0.001;
+t_final = 10;
+t = (0:ts:t_final);
+
+%% Time auxiliar
+t_init = (0:ts:5);
+%% Particles Definition
+m = 0.015;
+fm = 0.5;
+nr = 1;
+nm = 30;
+%% Spring Length
+spring_length = 0.05;
+spring_k = 300;
+damper_k = 3;
+
+%% Gravitational Vector
+g = 9.8;
+wind_drag = 0.05;
+
+%% Angle
+alpha = 90*(pi/180);
+
+%% Vector with all the parameters
+L = [g; spring_length; spring_k; damper_k; wind_drag; ts; alpha; length(t)];
+
+%% Ropes Definition
+Matrix_ropes = Rope(nr, nm, m, fm, L);
+
+%% Velociy Of the first Mass
+v_extern = zeros(3, length(t));
+
+%% Aux time variable 
+t_aux_1 = (t >= 3) & (t < 4);
+v_extern(1, :) = 0.5;
+v_extern(2, :) = 0;
+v_extern(3, :) = 0;
+
+t_aux_2 = (t >= 5) & (t < 6);
+v_extern(1, :) = 0;
+v_extern(2, :) = -0.5;
+v_extern(3, :) = 0; 
+
+%% Init System
+for k = 1:length(t_init)
+    Matrix_ropes.f_system_ropes(2);
+end
+
+%% Simulation System
+for k = 1:length(t)
+    % Apply velocity to the system
+    Matrix_ropes.apply_Velocity(v_extern(:, k));
+    % Get system Information
+    tic
+    Matrix_ropes.f_system_ropes(k+1);
+    toc;
+end
+
+close all; paso=1; 
+%a) Parámetros del cuadro de animación
+figure
+set(gcf,'Position',[300 200 800 700])
+myVideo = VideoWriter('myVideoFile'); %open video file
+myVideo.FrameRate = 10;  %can adjust this, 5 - 10 works well for me
+open(myVideo)
+grid minor;
+
+for k = 2:40:length(t)
+    drawnow
+    t(k)
+    drawpend_ropes(Matrix_ropes, k);
+    frame = getframe(gcf); %get frame
+    writeVideo(myVideo, frame);
+    hold off;
+end
+close(myVideo)

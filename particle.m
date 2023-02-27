@@ -28,6 +28,11 @@ classdef particle < matlab.mixin.SetGet
             obj.q = [obj.pos;obj.vel];
         end
         
+        function set_vel(obj, velocity)
+            obj.vel = velocity;
+            obj.q = [obj.pos;obj.vel];
+        end
+        
         function x = get_pos(obj)
             x = obj.pos;
         end
