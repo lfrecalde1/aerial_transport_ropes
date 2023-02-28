@@ -18,6 +18,7 @@ classdef Rope < matlab.mixin.SetGet
         alpha;
         data;
         N;
+        total_force;
 
     end
     
@@ -41,6 +42,7 @@ classdef Rope < matlab.mixin.SetGet
             obj.n_masses(1:obj.number_rope,1:obj.number_mass) = particle(m, obj.ts);
             obj.init_ropes();
             obj.set_ropes();
+            obj.total_force =   zeros(3, nr);
             
             %% Set Data
             obj.data = zeros(3,nm,nr, obj.N);
@@ -136,11 +138,10 @@ classdef Rope < matlab.mixin.SetGet
                     V_2 = obj.n_masses(i, j).vel - obj.n_masses(i, j-1).vel;
                     rp_2 = V_2;
                     F_damper_2 = -obj.damper_k*rp_2;
-                    F_grav_2 = -obj.n_masses(i, j).m* obj.gravitation;
+                    F_grav_2 = -obj.n_masses(i, j).m*obj.gravitation;
                     
                     %% Total Force
                     force_2 = F_grav_2 + F_spring_2 + F_wind_2 + F_damper_2;
-                   
                     obj.n_masses(i, j).apply_force(force_2);
                 end
             end
@@ -148,8 +149,7 @@ classdef Rope < matlab.mixin.SetGet
         end
         
         function f_system_ropes(obj, k)
-            obj.system_forces();
-            
+            %obj.system_forces();
             for i = 1:obj.number_rope
                 for j = 1:obj.number_mass
                     obj.n_masses(i, j).f_system();
@@ -159,11 +159,27 @@ classdef Rope < matlab.mixin.SetGet
             
         end
         
+        function x = get_total_force(obj)
+            for i = 1:obj.number_rope
+                aux_rope = [0;0;0];
+                for j = 1:obj.number_mass
+                    aux_rope = aux_rope + obj.n_masses(i, j).get_internal_force();
+                end
+                aux_rope = aux_rope + (-obj.n_masses(i, j).m*obj.gravitation);
+                aux_rope(1) = -aux_rope(1);
+                aux_rope(2) = -aux_rope(2);
+                obj.total_force(:, i) = aux_rope;
+            end
+            x = obj.total_force;
+        end
+        
         function apply_Velocity(obj,Velocity_systems)
             for i = 1:obj.number_rope
                 obj.n_masses(i, 1).set_vel(Velocity_systems(:,i))
             end
         end
+        
+        
     end
 end
 

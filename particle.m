@@ -41,6 +41,11 @@ classdef particle < matlab.mixin.SetGet
             x = obj.vel;
         end
         
+        function x = get_internal_force(obj)
+            x = obj.internal_force;
+            
+        end
+        
         function apply_force(obj, forces)
            obj.internal_force = obj.internal_force + forces;
         end

@@ -2,7 +2,7 @@
 clc, clear all, close all;
 %% Set time parameters
 ts = 0.001;
-t_final = 10;
+t_final = 20;
 t = (0:ts:t_final);
 
 %% Time auxiliar
@@ -13,13 +13,13 @@ fm = 0.5;
 nr = 1;
 nm = 50;
 %% Spring Length
-spring_length = 0.02;
-spring_k = 3000;
-damper_k = 3;
+spring_length = 0.015;
+spring_k = 1000;
+damper_k = 2.5;
 
 %% Gravitational Vector
 g = 9.8;
-wind_drag = 0.05;
+wind_drag = 0.09;
 
 %% Angle
 alpha = 90*(pi/180);
@@ -35,17 +35,18 @@ v_extern = zeros(3, length(t));
 
 %% Aux time variable 
 
-v_extern(1, :) = 0.8*sin(1*t);
-v_extern(2, :) = 0.8*cos(1*t);
+v_extern(1, :) = 0.0*sin(1*t);
+v_extern(2, :) = 0.0*cos(1*t);
 v_extern(3, :) = 0;
 
-t_aux_2 = (t >= 5) & (t <= t_final);
+t_aux_2 = (t >= 10) & (t <= t_final);
 v_extern(1, t_aux_2) = 0;
 v_extern(2, t_aux_2) = 0;
 v_extern(3, t_aux_2) = 0; 
 
 %% Init System
 for k = 1:length(t_init)
+    Matrix_ropes.system_forces();
     Matrix_ropes.f_system_ropes(2);
 end
 
@@ -55,6 +56,8 @@ for k = 1:length(t)
     Matrix_ropes.apply_Velocity(v_extern(:, k));
     % Get system Information
     tic
+    Matrix_ropes.system_forces();
+    Forces_rope(:, k) = Matrix_ropes.get_total_force();
     Matrix_ropes.f_system_ropes(k+1);
     toc;
 end
@@ -91,3 +94,17 @@ for k = 2:50:length(t)
 
 end
 close(myVideo)
+
+figure
+set(gcf, 'PaperUnits', 'inches');
+set(gcf, 'PaperSize', [4 2]);
+set(gcf, 'PaperPositionMode', 'manual');
+set(gcf, 'PaperPosition', [0 0 10 4]);
+plot(t(1:length(Forces_rope)),Forces_rope(1,:),'Color',[226,76,44]/255,'linewidth',1); hold on;
+plot(t(1:length(Forces_rope)),Forces_rope(2,:),'Color',[46,188,89]/255,'linewidth',1); hold on;
+plot(t(1:length(Forces_rope)),Forces_rope(3,:),'Color',[26,115,160]/255,'linewidth',1);hold on;
+grid('minor')
+grid on;
+legend({'$F_{x}$','$F_{y}$','$F_{z}$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
+legend('boxoff')
+ylabel('$[N]$','Interpreter','latex','FontSize',9);
