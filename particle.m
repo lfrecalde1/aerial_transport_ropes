@@ -9,6 +9,7 @@ classdef particle < matlab.mixin.SetGet
         q
         ts
         internal_force
+        internal_aceleration;
     end
     
     methods
@@ -21,6 +22,7 @@ classdef particle < matlab.mixin.SetGet
             obj.q = [obj.pos;obj.vel];
             obj.ts = dt;
             obj.internal_force = zeros(3, 1);
+            obj.internal_aceleration = zeros(3,1);
         end
         
         function set_pos(obj, position)
@@ -46,14 +48,19 @@ classdef particle < matlab.mixin.SetGet
             
         end
         
+        function x = get_internal_aceleration(obj)
+            x = obj.internal_aceleration;
+            
+        end
+        
         function apply_force(obj, forces)
            obj.internal_force = obj.internal_force + forces;
         end
         
         function xp = f_model(obj, x, force)
-            
+            obj.internal_aceleration = force/obj.m;
             xp1 = x(4:6);
-            xp2 = force/obj.m;
+            xp2 = obj.internal_aceleration;
             xp = [xp1;xp2];
         
         end
@@ -75,7 +82,7 @@ classdef particle < matlab.mixin.SetGet
             obj.pos = x(1:3);
             obj.vel = x(4:6);
             obj.internal_force = zeros(3,1);
-            
+            obj.internal_aceleration = zeros(3, 1);
         end
     end
 end

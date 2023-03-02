@@ -19,6 +19,7 @@ classdef Rope < matlab.mixin.SetGet
         data;
         N;
         total_force;
+        norm_force;
 
     end
     
@@ -43,7 +44,7 @@ classdef Rope < matlab.mixin.SetGet
             obj.init_ropes();
             obj.set_ropes();
             obj.total_force =   zeros(3, nr);
-            
+            obj.norm_force = zeros(1, nr);
             %% Set Data
             obj.data = zeros(3,nm,nr, obj.N);
             for i = 1:obj.number_rope
@@ -128,7 +129,7 @@ classdef Rope < matlab.mixin.SetGet
                     r_2 = L_2/norm(L_2,2);
                     if norm(L_2,2) ~= 0
                         s_2 = norm(L_2,2)-obj.spring_l;
-                        F_spring_2 = - obj.spring_k*s_2*r_2;
+                        F_spring_2 = -(1*obj.fm/obj.m)*obj.spring_k*s_2*r_2;
                     else
                         F_spring_2 = [0; 0; 0];
                     end
@@ -137,7 +138,7 @@ classdef Rope < matlab.mixin.SetGet
                     F_wind_2 = -obj.n_masses(i, j).vel*obj.wind_drag;
                     V_2 = obj.n_masses(i, j).vel - obj.n_masses(i, j-1).vel;
                     rp_2 = V_2;
-                    F_damper_2 = -obj.damper_k*rp_2;
+                    F_damper_2 = -(1*obj.fm/obj.m)*obj.damper_k*rp_2;
                     F_grav_2 = -obj.n_masses(i, j).m*obj.gravitation;
                     
                     %% Total Force
@@ -159,7 +160,7 @@ classdef Rope < matlab.mixin.SetGet
             
         end
         
-        function x = get_total_force(obj)
+        function [x, x_norm] = get_total_force(obj)
             for i = 1:obj.number_rope
                 aux_rope = [0;0;0];
                 for j = 1:obj.number_mass
@@ -169,8 +170,10 @@ classdef Rope < matlab.mixin.SetGet
                 aux_rope(1) = -aux_rope(1);
                 aux_rope(2) = -aux_rope(2);
                 obj.total_force(:, i) = aux_rope;
+                obj.norm_force(1, i) = norm(aux_rope, 2);
             end
             x = obj.total_force;
+            x_norm = obj.norm_force;
         end
         
         function apply_Velocity(obj,Velocity_systems)

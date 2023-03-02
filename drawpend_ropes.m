@@ -38,6 +38,6 @@ for i = 1:Matrix_ropes.number_rope
 end
 title('$\textrm{Movement Executed by the Aerial Robots}$','Interpreter','latex','FontSize',11);
 xlabel('$\textrm{X}[m]$','Interpreter','latex','FontSize',9); ylabel('$\textrm{Y}[m]$','Interpreter','latex','FontSize',9);zlabel('$\textrm{Z}[m]$','Interpreter','latex','FontSize',9);
-axis([-2.5 2.5 -2.5 2.5 -2.5 2.5]);
+axis([-3.5 3.5 -3.5 3.5 -3.5 3.5]);
 grid minor;
 % hold off;

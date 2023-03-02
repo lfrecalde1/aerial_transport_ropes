@@ -1,0 +1,184 @@
+%% Code to simulate a rope
+clc, clear all, close all;
+%% Set time parameters
+ts = 0.001;
+t_final = 12;
+t = (0:ts:t_final);
+
+%% Time auxiliar
+t_init = (0:ts:5);
+
+%% Particles Definition
+m = 0.01;
+fm = 1.5;
+
+%% Just for two ropes
+nr = 2;
+nm = 70;
+
+%% Spring Length
+spring_length = 0.05;
+spring_k = 6000;
+damper_k = 4.9;
+
+%% Gravitational Vector
+g = 9.8;
+wind_drag = 0.06;
+
+%% Angle
+alpha = 80*(pi/180);
+
+%% Pose Load
+load_pose = [1; 0; -0.5];
+
+%% Vector with all the parameters
+L = [g; spring_length; spring_k; damper_k; wind_drag; ts; alpha; length(t)];
+
+%% Ropes Definition
+Matrix_ropes = Multiple_Ropes(nr, nm, m, fm, L, load_pose);
+
+%% Velociy Of the first Mass
+v_extern = zeros(3, nr, length(t));
+
+%% Velocity rope 1
+v_extern(1, 1, :) = 0.0*sin(1*t);
+v_extern(2, 1, :) = 0.0*cos(1*t);
+v_extern(3, 1, :) = 0;
+
+
+%% Velocity Rope 2
+v_extern(1, 2, :) = 0.0*sin(2*t);
+v_extern(2, 2, :) = 0.0*cos(1*t);
+v_extern(3, 2, :) = 0.8*sin(0.3*t);
+
+%% Vector to save forces of each rope
+Forces_rope = zeros(3, nr, length(t));
+norm_force = zeros(nr, length(t));
+
+for k = 1:length(t_init)
+    Matrix_ropes.system_forces();
+    Matrix_ropes.f_system_ropes(2);
+end
+% Get Dh
+dh = zeros(1, length(t)); 
+% Simulation System
+for k = 1:length(t)
+    % Apply velocity to the system
+    Matrix_ropes.apply_Velocity(v_extern(:, :, k));
+    % Get system Information
+    tic
+    Matrix_ropes.system_forces();
+    [Forces_rope(:, 1:nr, k), norm_force(:, k)]= Matrix_ropes.get_total_force();
+    dh(k) = Matrix_ropes.data(3,1,2,k) - Matrix_ropes.data(3,1,1,k);
+
+    % System Evolution
+    Matrix_ropes.f_system_ropes(k+1);
+    toc;
+end
+
+close all; paso=1; 
+%a) Parámetros del cuadro de animación
+figure
+set(gcf,'Position',[300 200 800 700])
+myVideo = VideoWriter('myVideoFile'); 
+myVideo.FrameRate = 10;  
+open(myVideo)
+luz = light;
+luz.Color=[0.65,0.65,0.65];
+luz.Style = 'infinite';
+grid minor;
+rope_1_body = plot3(Matrix_ropes.data(1,:,1,1), Matrix_ropes.data(2,:,1,1), Matrix_ropes.data(3,:,1,1),'.-','Color',[56,171,217]/255,'linewidth',5*Matrix_ropes.m);
+rope_2_body = plot3(Matrix_ropes.data(1,:,2,1), Matrix_ropes.data(2,:,2,1), Matrix_ropes.data(3,:,2,1),'.-','Color',[56,171,217]/255,'linewidth',5*Matrix_ropes.m);
+rope_final = plot3(Matrix_ropes.data_final(1,1), Matrix_ropes.data_final(2,1), Matrix_ropes.data_final(3,1),'o','Color',[100,100,100]/255,'linewidth',5*Matrix_ropes.fm);
+view([0 0])
+for k = 2:50:length(t)
+    drawnow;
+    delete(rope_1_body);
+    delete(rope_2_body);
+    delete(rope_final);
+    rope_1_body = plot3(Matrix_ropes.data(1,:,1,k), Matrix_ropes.data(2,:,1,k), Matrix_ropes.data(3,:,1,k),'.-','Color',[56,171,217]/255,'linewidth',5*Matrix_ropes.m); hold on;
+    rope_2_body = plot3(Matrix_ropes.data(1,:,2,k), Matrix_ropes.data(2,:,2,k), Matrix_ropes.data(3,:,2,k),'.-','Color',[56,171,217]/255,'linewidth',5*Matrix_ropes.m); hold on;
+    rope_final = plot3(Matrix_ropes.data_final(1,k), Matrix_ropes.data_final(2,k), Matrix_ropes.data_final(3,k),'o','Color',[100,100,100]/255,'linewidth',5*Matrix_ropes.fm); hold on;
+    title('$\textrm{Movement Executed}$','Interpreter','latex','FontSize',11);
+    xlabel('$\textrm{X}[m]$','Interpreter','latex','FontSize',9); ylabel('$\textrm{Y}[m]$','Interpreter','latex','FontSize',9);zlabel('$\textrm{Z}[m]$','Interpreter','latex','FontSize',9);
+    axis([-5.5 5.5 -5.5 5.5 -5.5 5.5]);
+    %grid minor;
+    view([0 0]);
+    %% Video Save
+    frame = getframe(gcf); %get frame
+    writeVideo(myVideo, frame);
+
+end
+
+%% Auxiliar variables
+Forces_rope_1 = reshape(Forces_rope(:,1,:), 3, length(t));
+Forces_rope_2 = reshape(Forces_rope(:,2,:), 3, length(t));
+close(myVideo)
+
+figure
+set(gcf, 'PaperUnits', 'inches');
+set(gcf, 'PaperSize', [4 2]);
+set(gcf, 'PaperPositionMode', 'manual');
+set(gcf, 'PaperPosition', [0 0 10 4]);
+plot(t(1:length(t)),Forces_rope_1(1,:),'Color',[226,76,44]/255,'linewidth',1); hold on;
+plot(t(1:length(t)),Forces_rope_1(2,:),'Color',[46,188,89]/255,'linewidth',1); hold on;
+plot(t(1:length(t)),Forces_rope_1(3,:),'Color',[26,115,160]/255,'linewidth',1);hold on;
+grid('minor')
+grid on;
+legend({'$F_{x}$','$F_{y}$','$F_{z}$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
+legend('boxoff')
+ylabel('$[N]$','Interpreter','latex','FontSize',9);
+
+figure
+set(gcf, 'PaperUnits', 'inches');
+set(gcf, 'PaperSize', [4 2]);
+set(gcf, 'PaperPositionMode', 'manual');
+set(gcf, 'PaperPosition', [0 0 10 4]);
+plot(t(1:length(t)),norm_force(1,:),'Color',[226,76,44]/255,'linewidth',1); hold on;
+grid('minor')
+grid on;
+legend({'$||F||$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
+legend('boxoff')
+ylabel('$[N]$','Interpreter','latex','FontSize',9);
+
+% % 
+figure
+set(gcf, 'PaperUnits', 'inches');
+set(gcf, 'PaperSize', [4 2]);
+set(gcf, 'PaperPositionMode', 'manual');
+set(gcf, 'PaperPosition', [0 0 10 4]);
+plot(t(1:length(t)),Forces_rope_2(1,:),'Color',[226,76,44]/255,'linewidth',1); hold on;
+plot(t(1:length(t)),Forces_rope_2(2,:),'Color',[46,188,89]/255,'linewidth',1); hold on;
+plot(t(1:length(t)),Forces_rope_2(3,:),'Color',[26,115,160]/255,'linewidth',1);hold on;
+grid('minor')
+grid on;
+legend({'$F_{x}$','$F_{y}$','$F_{z}$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
+legend('boxoff')
+ylabel('$[N]$','Interpreter','latex','FontSize',9);
+
+figure
+set(gcf, 'PaperUnits', 'inches');
+set(gcf, 'PaperSize', [4 2]);
+set(gcf, 'PaperPositionMode', 'manual');
+set(gcf, 'PaperPosition', [0 0 10 4]);
+plot(t(1:length(t)),norm_force(2,:),'Color',[226,76,44]/255,'linewidth',1); hold on;
+grid('minor')
+grid on;
+legend({'$||F||$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
+legend('boxoff')
+ylabel('$[N]$','Interpreter','latex','FontSize',9);
+
+figure
+set(gcf, 'PaperUnits', 'inches');
+set(gcf, 'PaperSize', [4 2]);
+set(gcf, 'PaperPositionMode', 'manual');
+set(gcf, 'PaperPosition', [0 0 10 4]);
+plot(t(1:length(t)),norm_force(1,:),'Color',[226,76,44]/255,'linewidth',1); hold on;
+plot(t(1:length(t)),norm_force(2,:),'Color',[100,76,44]/255,'linewidth',1); hold on;
+plot(t(1:length(t)),dh(1,:),'Color',[100,100,44]/255,'linewidth',1); hold on;
+grid('minor')
+grid on;
+legend({'$||F_1||$','$||F_2||$','$||dh||$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
+legend('boxoff')
+ylabel('$[N]$','Interpreter','latex','FontSize',9);
+xlabel('$[dh]$','Interpreter','latex','FontSize',9);
