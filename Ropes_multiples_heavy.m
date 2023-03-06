@@ -1,4 +1,4 @@
-%% Code to simulate a rope
+%% Code to simulate a rope with the aerial vehicle
 clc, clear all, close all;
 %% Set time parameters
 ts = 0.001;

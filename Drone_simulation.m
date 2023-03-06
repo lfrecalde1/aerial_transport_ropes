@@ -46,14 +46,14 @@ u = zeros(4, length(t));
 
 %% Desired Trajectory of the system
 phi_d = (15*pi/180)*ones(1, length(t));
-theta_d = (15*pi/180)*ones(1, length(t));
+theta_d = (-25*pi/180)*ones(1, length(t));
 zd = 0*ones(1, length(t));
 psid = (0)*ones(1, length(t));
 
 phid_d = 0*ones(1, length(t));
 thetad_d = 0*ones(1, length(t));
 zd_d = 2*ones(1, length(t));
-psid_d = 0*ones(1, length(t));
+psid_d = 0.2*ones(1, length(t));
 
 xd_dd = 0*ones(1, length(t));
 yd_dd = 0*ones(1, length(t));
@@ -63,10 +63,10 @@ hd = [phi_d;theta_d;zd;psid];
 hd_d = [phid_d;thetad_d;zd_d;psid_d];
 hd_dd = [xd_dd;yd_dd;zd_dd];
 
-%% PID
-
+%% PID 
 e_pose_i = [0;0;0];
-e_angle_i = [0;0;0];
+e_angle_i = [0;0];
+
 %% Simulation system
 for k = 1:length(t)
     %% Controller section
@@ -117,30 +117,13 @@ set(gcf, 'PaperUnits', 'inches');
 set(gcf, 'PaperSize', [4 2]);
 set(gcf, 'PaperPositionMode', 'manual');
 set(gcf, 'PaperPosition', [0 0 10 4]);
-plot(t,h(1,1:length(t)),'Color',[226,76,44]/255,'linewidth',1); hold on
-plot(t,h(2,1:length(t)),'Color',[46,188,89]/255,'linewidth',1); hold on
-plot(t,h(3,1:length(t)),'Color',[26,115,160]/255,'linewidth',1); hold on
-
-grid on;
-legend({'$x$','$y$','$z$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
-legend('boxoff')
-title('$\textrm{Positions}$','Interpreter','latex','FontSize',9);
-ylabel('$[rad]$','Interpreter','latex','FontSize',9);
-xlabel('$\textrm{Time}[s]$','Interpreter','latex','FontSize',9);
-
-
-figure
-set(gcf, 'PaperUnits', 'inches');
-set(gcf, 'PaperSize', [4 2]);
-set(gcf, 'PaperPositionMode', 'manual');
-set(gcf, 'PaperPosition', [0 0 10 4]);
 plot(t,euler(1,1:length(t)),'Color',[226,76,44]/255,'linewidth',1); hold on
 plot(t,euler(2,1:length(t)),'Color',[46,188,89]/255,'linewidth',1); hold on
-plot(t,euler(3,1:length(t)),'Color',[26,115,160]/255,'linewidth',1); hold on
+plot(t,euler_d(3,1:length(t)),'Color',[26,115,160]/255,'linewidth',1); hold on
 plot(t,h(6,1:length(t)),'--','Color',[226,76,44]/255,'linewidth',1); hold on
 plot(t,hd(1,1:length(t)),'--','Color',[226,76,44]/255,'linewidth',1); hold on
 plot(t,hd(2,1:length(t)),'--','Color',[46,188,89]/255,'linewidth',1); hold on
-plot(t,hd(3,1:length(t)),'--','Color',[26,115,160]/255,'linewidth',1); hold on
+plot(t,hd_d(4,1:length(t)),'--','Color',[26,115,160]/255,'linewidth',1); hold on
 plot(t,hd_d(3,1:length(t)),'--','Color',[26,115,160]/255,'linewidth',1); hold on
 
 grid on;
@@ -150,41 +133,6 @@ title('$\textrm{Positions}$','Interpreter','latex','FontSize',9);
 ylabel('$[rad]$','Interpreter','latex','FontSize',9);
 xlabel('$\textrm{Time}[s]$','Interpreter','latex','FontSize',9);
 
-figure
-set(gcf, 'PaperUnits', 'inches');
-set(gcf, 'PaperSize', [4 2]);
-set(gcf, 'PaperPositionMode', 'manual');
-set(gcf, 'PaperPosition', [0 0 10 4]);
-plot(t,euler_d(1,1:length(t)),'Color',[226,76,44]/255,'linewidth',1); hold on
-plot(t,euler_d(2,1:length(t)),'Color',[46,188,89]/255,'linewidth',1); hold on
-plot(t,euler_d(3,1:length(t)),'Color',[26,115,160]/255,'linewidth',1); hold on
-
-grid on;
-legend({'$\dot{\phi}$','$\dot{\theta}$','$\dot{\psi}$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
-legend('boxoff')
-title('$\textrm{Positions}$','Interpreter','latex','FontSize',9);
-ylabel('$[rad]$','Interpreter','latex','FontSize',9);
-xlabel('$\textrm{Time}[s]$','Interpreter','latex','FontSize',9);
-
-figure
-set(gcf, 'PaperUnits', 'inches');
-set(gcf, 'PaperSize', [4 2]);
-set(gcf, 'PaperPositionMode', 'manual');
-set(gcf, 'PaperPosition', [0 0 10 4]);
-plot(t,h(4,1:length(t)),'Color',[226,76,44]/255,'linewidth',1); hold on
-plot(t,h(5,1:length(t)),'Color',[46,188,89]/255,'linewidth',1); hold on
-plot(t,h(6,1:length(t)),'Color',[26,115,160]/255,'linewidth',1); hold on
-
-plot(t,hd_d(1,1:length(t)),'--','Color',[226,76,44]/255,'linewidth',1); hold on
-plot(t,hd_d(2,1:length(t)),'--','Color',[46,188,89]/255,'linewidth',1); hold on
-plot(t,hd_d(3,1:length(t)),'--','Color',[26,115,160]/255,'linewidth',1); hold on
-
-grid on;
-legend({'$x$','$y$','$z$','$x_d$','$y_d$','$z_d$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
-legend('boxoff')
-title('$\textrm{Positions}$','Interpreter','latex','FontSize',9);
-ylabel('$[rad]$','Interpreter','latex','FontSize',9);
-xlabel('$\textrm{Time}[s]$','Interpreter','latex','FontSize',9);
 
 figure
 set(gcf, 'PaperUnits', 'inches');

@@ -211,6 +211,16 @@ classdef Ropes_general < matlab.mixin.SetGet
             end
         end
         
+        %% Get initial position and velocity of the first element
+        function [x, xp]= get_position_initial(obj)
+            x = [];
+            xp = [];
+           for i = 1:obj.number_rope
+                x = [x;obj.n_masses(i, 1).get_pos()'];
+                xp = [xp;obj.n_masses(i, 1).get_pos()'];
+           end
+        end
+        
         %% Function for positioning of the rope
         function x = ropes_initial_angles(obj, k)
             if k ==1

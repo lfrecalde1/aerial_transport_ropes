@@ -1,4 +1,4 @@
-function [xp] = system_dynamics(h, u, L)
+function [xp] = system_dynamics(h, u, F_ext, L)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 %% System parameters
@@ -14,8 +14,7 @@ J = [Jxx, 0 0;...
      0, Jyy, 0;...
      0, 0, Jzz];
  
-%% Force body frame Drone
-F = [0; 0; u(1)];
+
 %% Torques inputs
 tau = [u(2); u(3); u(4)];
 
@@ -30,8 +29,13 @@ omega = h(11:13);
 %% Rotational matrix
 [R] = QuatToRot(quat);
 
+%% Force body frame Drone
+
+F = [0; 0; u(1)];
+F_ext_B = inv(R)*F_ext;
+F_ext = F_ext;
 %% Aceleration system 
-acceleration = (R*F)/m- e*g;
+acceleration = (R*F)/m- e*g + F_ext/m;
 q_dot = quat_dot(quat, omega);
 aux = J*omega;
 pqr_dot = inv(J)*(tau - cross(omega, aux));
