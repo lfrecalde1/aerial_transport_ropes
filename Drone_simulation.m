@@ -3,7 +3,7 @@
 clc, clear all, close all;
 %% Set time parameters
 ts = 0.001;
-t_final = 5;
+t_final = 10;
 t = (0:ts:t_final);
 
 %% Initial state
@@ -45,15 +45,15 @@ L_drone = [g; m_drone; l_drone; Jxx_drone; Jyy_drone; Jzz_drone];
 u = zeros(4, length(t));
 
 %% Desired Trajectory of the system
-phi_d = (15*pi/180)*ones(1, length(t));
-theta_d = (-25*pi/180)*ones(1, length(t));
+phi_d = (30*pi/180)*sin(1*t);
+theta_d = (0*pi/180)*ones(1, length(t));
 zd = 0*ones(1, length(t));
-psid = (0)*ones(1, length(t));
+psid = 0*ones(1, length(t));
 
 phid_d = 0*ones(1, length(t));
 thetad_d = 0*ones(1, length(t));
-zd_d = 2*ones(1, length(t));
-psid_d = 0.2*ones(1, length(t));
+zd_d = 0*ones(1, length(t));
+psid_d = 0.0*ones(1, length(t));
 
 xd_dd = 0*ones(1, length(t));
 yd_dd = 0*ones(1, length(t));
@@ -73,7 +73,8 @@ for k = 1:length(t)
     [u(:, k), e_pose_i, e_angle_i]= low_level_controller(h(:, k ), hd(:, k), hd_d(:, k), hd_dd(:, k), L_drone,  e_pose_i, e_angle_i, ts);    
     tic
     %% System evolution
-    h(:, k+1) = system_simulation(h(:, k), u(:, k), L_drone, ts);
+    F_extern = [0;0;0];
+    h(:, k+1) = system_simulation(h(:, k), u(:, k), F_extern, L_drone, ts);
     R(:, :, k+1) = QuatToRot(h(7:10, k+1));
     euler(:, k+1) = quat2eul(h(7:10, k+1)','XYZ');
     euler_d(:, k+1) = euler_dot(euler(:, k+1), h(11:13, k+1));
@@ -96,7 +97,7 @@ Drone_Parameters(0.02);
 G2=Drone_Plot_3D(h(1,1),h(2,1),h(3,1),R(:, :, 1));hold on
 plot3(h(1,1),h(2,1),h(3,1),'--','Color',[56,171,217]/255,'linewidth',1.5);hold on,grid on
 
-axis([-3.5 3.5 -3.5 3.5 -3.5 3.5]);
+axis([-9.5 9.5 -9.5 9.5 -9.5 9.5]);
 view(20,15);
 for k = 1:200:length(t)-1
     drawnow

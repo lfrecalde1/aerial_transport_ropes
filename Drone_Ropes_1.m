@@ -104,7 +104,7 @@ L_drone = [g; m_drone; l_drone; Jxx_drone; Jyy_drone; Jzz_drone];
 u = zeros(4, length(t));
 
 %% Desired Trajectory of the system
-phi_d = (15*pi/180)*sin(1*t);
+phi_d = (30*pi/180)*sin(1*t);
 theta_d = (0*pi/180)*ones(1, length(t));
 zd = 0*ones(1, length(t));
 psid = 0*ones(1, length(t));
@@ -189,9 +189,9 @@ for k = 2:100:length(t)
     rope_final = plot3(Matrix_ropes.data_final(1,k), Matrix_ropes.data_final(2,k), Matrix_ropes.data_final(3,k),'o','Color',[100,100,100]/255,'linewidth',5*Matrix_ropes.fm); hold on;
     title('$\textrm{Executed Movement}$','Interpreter','latex','FontSize',11);
     xlabel('$\textrm{X}[m]$','Interpreter','latex','FontSize',9); ylabel('$\textrm{Y}[m]$','Interpreter','latex','FontSize',9);zlabel('$\textrm{Z}[m]$','Interpreter','latex','FontSize',9);
-    axis([-9.5 9.5 -9.5 9.5 -9.5 9.5]);
+    axis([-17.5 17.5 -17.5 17.5 -17.5 17.5]);
     %grid minor;
-    %view([-90 0]);
+    view([-90 0]);
     %% Video Save
     frame = getframe(gcf); %get frame
     writeVideo(myVideo, frame);
@@ -227,3 +227,26 @@ legend({'$||F||$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal
 legend('boxoff')
 ylabel('$[N]$','Interpreter','latex','FontSize',9);
 
+figure
+set(gcf, 'PaperUnits', 'inches');
+set(gcf, 'PaperSize', [4 2]);
+set(gcf, 'PaperPositionMode', 'manual');
+set(gcf, 'PaperPosition', [0 0 10 4]);
+subplot(1,2,1)
+plot(t,u(1,1:length(t)),'Color',[226,76,44]/255,'linewidth',1); hold on
+grid on;
+legend({'$f$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
+legend('boxoff')
+title('$\textrm{Positions}$','Interpreter','latex','FontSize',9);
+ylabel('$[rad]$','Interpreter','latex','FontSize',9);
+xlabel('$\textrm{Time}[s]$','Interpreter','latex','FontSize',9);
+subplot(1,2,2)
+plot(t,u(2,1:length(t)),'Color',[46,188,89]/255,'linewidth',1); hold on
+plot(t,u(3,1:length(t)),'Color',[26,115,160]/255,'linewidth',1); hold on
+plot(t,u(4,1:length(t)),'Color',[26,50,160]/255,'linewidth',1); hold on
+grid on;
+legend({'$\tau_{\phi}$','$\tau_{\theta}$','$\tau_{\psi}$'},'Interpreter','latex','FontSize',11,'Orientation','horizontal');
+legend('boxoff')
+title('$\textrm{Positions}$','Interpreter','latex','FontSize',9);
+ylabel('$[rad]$','Interpreter','latex','FontSize',9);
+xlabel('$\textrm{Time}[s]$','Interpreter','latex','FontSize',9);
